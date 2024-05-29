@@ -1,0 +1,25 @@
+on:
+  schedule:
+  - cron:  "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  repo-sync:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Generate a token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ vars.SYNC_ID }}
+        private-key: ${{ secrets.SYNC_TOKEN }}
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - name: repo-sync
+      uses: repo-sync/github-sync@v2
+      with:
+        source_repo: "testkapua/main"
+        source_branch: "main"
+        destination_branch: "main"
+        github_token: ${{ steps.generate-token.outputs.token }}
